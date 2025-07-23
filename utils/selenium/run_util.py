@@ -58,7 +58,7 @@ def extract_family_members(driver) -> list[str]:
 
 async def parse_family_members(session_id: str, steam_login_secure: str) -> tuple[str, io.BytesIO | None]:
     options = Options()
-    # options.add_argument("--headless=new")
+    options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--start-maximized")
