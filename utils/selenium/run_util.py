@@ -58,13 +58,13 @@ def extract_family_members(driver) -> list[str]:
 
 async def parse_family_members(session_id: str, steam_login_secure: str) -> tuple[str, io.BytesIO | None]:
     options = Options()
-    options.add_argument("--headless=new")
+    # options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--start-maximized")
     driver = webdriver.Chrome(options=options)
 
-    byte_io = io.BytesIO()
+    byte_io = None
     try:
         driver.get("https://steampowered.com")
         time.sleep(1)
@@ -76,13 +76,13 @@ async def parse_family_members(session_id: str, steam_login_secure: str) -> tupl
         time.sleep(5)
         members = extract_family_members(driver)
 
-
         driver.get("https://store.steampowered.com/account/familymanagement?tab=history")
-        time.sleep(3)
+        time.sleep(5)
         screenshot = driver.get_screenshot_as_png()
         img = Image.open(io.BytesIO(screenshot))
         width, height = img.size
         cropped_img = img.crop((705, 320, width - 500, height - 100))
+        byte_io = io.BytesIO()
         cropped_img.save(byte_io, format="PNG")
         byte_io.seek(0)
 

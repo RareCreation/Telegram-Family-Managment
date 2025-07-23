@@ -5,6 +5,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, \
     CallbackQuery, BufferedInputFile
+
 from states.states import UploadCookiesStates
 from utils.selenium.run_util import run_selenium_check, parse_family_members
 
@@ -86,9 +87,11 @@ async def handle_account_info(c: CallbackQuery):
     session_id, steam_login_secure = row
     result_text, screenshot_io = await parse_family_members(session_id, steam_login_secure)
 
-    photo = BufferedInputFile(screenshot_io.read(), "screenshot.png")
-    await c.message.answer_photo(photo=photo, caption=f"👨‍👩‍👧‍👦 <b>Аккаунт {nickname}</b>\n\n{result_text}",
-                                 parse_mode="HTML")
+    if screenshot_io is None:
+        await c.message.answer(f"👨‍👩‍👧‍👦 <b>Аккаунт {nickname}</b>\n\n{result_text}\n\n⚠️ Не удалось получить скриншот", parse_mode="HTML")
+    else:
+        photo = BufferedInputFile(screenshot_io.read(), "screenshot.png")
+        await c.message.answer_photo(photo=photo, caption=f"👨‍👩‍👧‍👦 <b>Аккаунт {nickname}</b>\n\n{result_text}", parse_mode="HTML")
 
 
 @router.callback_query(F.data == "delete_account_list")
