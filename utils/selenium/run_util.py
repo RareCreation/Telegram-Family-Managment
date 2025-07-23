@@ -61,7 +61,8 @@ async def parse_family_members(session_id: str, steam_login_secure: str) -> tupl
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--start-maximized")
+    options.add_argument("--window-size=1920,1080")
+
     driver = webdriver.Chrome(options=options)
 
     byte_io = None
