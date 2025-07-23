@@ -1,0 +1,6 @@
+aiohttp~=3.12.14
+colorama~=0.4.6
+aiogram~=3.21.0
+python-dotenv~=1.1.1
+selenium~=4.34.2
+pillow~=11.3.0
