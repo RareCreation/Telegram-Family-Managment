@@ -43,7 +43,7 @@ async def check_parental_controls(bot: Bot):
 
                 panels = driver.find_elements(By.CLASS_NAME, "mz0H0iSlLfX7SQ7hv3kVY")
 
-                for panel in panels:
+                for panel in panels[1:]:
                     try:
                         member_name_element = panel.find_element(By.CLASS_NAME, "nOdcT-MoOaXGePXLyPe0H")
                         member_name = member_name_element.text
