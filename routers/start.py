@@ -20,6 +20,9 @@ async def handle_start(message: Message, state: FSMContext):
         ],
         [
             InlineKeyboardButton(text="Выгрузить аккаунт", callback_data="delete_account_list")
+        ],
+        [
+            InlineKeyboardButton(text="🚨 Помощь", callback_data="help")
         ]
     ])
 
@@ -60,7 +63,11 @@ async def process_steam_login_secure(message: Message, state: FSMContext):
     session_id = user_data["session_id"]
     steam_login_secure = message.text
 
+    loading_message = await message.answer("⏳ Проверка данных, подождите...")
+
     nickname, result = await run_selenium_check(session_id, steam_login_secure)
+
+    await loading_message.delete()
 
     if nickname:
         conn = sqlite3.connect("steam_accounts.db")
@@ -76,27 +83,42 @@ async def process_steam_login_secure(message: Message, state: FSMContext):
     await state.clear()
 
 
+
 @router.callback_query(F.data.startswith("account_"))
 async def handle_account_info(c: CallbackQuery):
     nickname = c.data.split("account_")[1]
+
+    loading_message = await c.message.answer("⏳ Загрузка данных, подождите...")
+
     conn = sqlite3.connect("steam_accounts.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT session_id, steam_login_secure FROM accounts WHERE user_id = ? AND nickname = ?", (c.from_user.id, nickname))
+    cursor.execute("SELECT session_id, steam_login_secure FROM accounts WHERE user_id = ? AND nickname = ?",
+                   (c.from_user.id, nickname))
     row = cursor.fetchone()
     conn.close()
 
     if not row:
+        await loading_message.delete()
         await c.message.answer("Аккаунт не найден.")
         return
 
     session_id, steam_login_secure = row
     result_text, screenshot_io = await parse_family_members(session_id, steam_login_secure)
 
+    await loading_message.delete()
+
     if screenshot_io is None:
-        await c.message.answer(f"👨‍👩‍👧‍👦 <b>Аккаунт {nickname}</b>\n\n{result_text}\n\n⚠️ Не удалось получить скриншот", parse_mode="HTML")
+        await c.message.answer(
+            f"👨‍👩‍👧‍👦 <b>Аккаунт {nickname}</b>\n\n{result_text}\n\n⚠️ Не удалось получить скриншот",
+            parse_mode="HTML"
+        )
     else:
         photo = BufferedInputFile(screenshot_io.read(), "screenshot.png")
-        await c.message.answer_photo(photo=photo, caption=f"👨‍👩‍👧‍👦 <b>Аккаунт {nickname}</b>\n\n{result_text}", parse_mode="HTML")
+        await c.message.answer_photo(
+            photo=photo,
+            caption=f"👨‍👩‍👧‍👦 <b>Аккаунт {nickname}</b>\n\n{result_text}",
+            parse_mode="HTML"
+        )
 
 
 @router.callback_query(F.data == "delete_account_list")
@@ -126,4 +148,15 @@ async def delete_account_callback(c: CallbackQuery):
     conn.close()
 
     await c.message.answer(f"Аккаунт {nickname} удалён.")
+
+@router.callback_query(F.data.startswith("help"))
+async def help_callback(c: CallbackQuery):
+    await c.message.answer(
+        "❓**Как получить sessionId и steamLoginSecure?**\n\n"
+        "⭐️Перейдите на [сайт](https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm) и скачайте расширение.\n"
+        "Откройте [Steam](https://store.steampowered.com/) и скопируйте там куки из расширения",
+        parse_mode="Markdown"
+    )
+
+
 
