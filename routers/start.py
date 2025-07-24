@@ -14,10 +14,15 @@ router = Router()
 @router.message(Command("start"))
 async def handle_start(message: Message, state: FSMContext):
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Список аккаунтов", callback_data="list_accounts")],
-        [InlineKeyboardButton(text="Загрузить аккаунт", callback_data="upload_account")],
-        [InlineKeyboardButton(text="Выгрузить аккаунт", callback_data="delete_account_list")]
+        [
+            InlineKeyboardButton(text="Список аккаунтов", callback_data="list_accounts"),
+            InlineKeyboardButton(text="Загрузить аккаунт", callback_data="upload_account")
+        ],
+        [
+            InlineKeyboardButton(text="Выгрузить аккаунт", callback_data="delete_account_list")
+        ]
     ])
+
     await message.answer("Выберите одну из функций", reply_markup=keyboard)
 
 @router.callback_query(F.data == "list_accounts")
