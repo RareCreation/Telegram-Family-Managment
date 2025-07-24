@@ -75,11 +75,11 @@ async def parse_family_members(session_id: str, steam_login_secure: str) -> tupl
         driver.add_cookie({"name": "steamLoginSecure", "value": steam_login_secure, "domain": ".steampowered.com"})
 
         driver.get("https://store.steampowered.com/account/familymanagement?tab=manage")
-        await asyncio.sleep(5)
+        await asyncio.sleep(3)
         members = extract_family_members(driver)
 
         driver.get("https://store.steampowered.com/account/familymanagement?tab=history")
-        await asyncio.sleep(5)
+        await asyncio.sleep(2)
         screenshot = driver.get_screenshot_as_png()
         img = Image.open(io.BytesIO(screenshot))
         width, height = img.size
