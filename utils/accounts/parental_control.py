@@ -1,7 +1,5 @@
 import asyncio
-from datetime import datetime
 import sqlite3
-import time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -43,7 +41,7 @@ async def check_parental_controls(bot: Bot):
 
                 panels = driver.find_elements(By.CLASS_NAME, "mz0H0iSlLfX7SQ7hv3kVY")
 
-                for panel in panels[1:]:
+                for panel in panels:
                     try:
                         member_name_element = panel.find_element(By.CLASS_NAME, "nOdcT-MoOaXGePXLyPe0H")
                         member_name = member_name_element.text
@@ -75,14 +73,21 @@ async def check_parental_controls(bot: Bot):
 
                     for panel in remaining_panels:
                         try:
-                            checkbox = panel.find_element(By.CSS_SELECTOR, 'div[role="checkbox"]')
+                            checkboxes = panel.find_elements(By.CSS_SELECTOR, 'div[role="checkbox"]')
+                            if not checkboxes:
+                                logger(
+                                    f"[{nickname}] Чекбокс не найден в панели — возможно, уже включён или DOM отличается.")
+                                continue
+
+                            checkbox = checkboxes[0]
                             aria_checked = checkbox.get_attribute("aria-checked")
                             if aria_checked == "false":
                                 checkbox.click()
                                 member_name = panel.find_element(By.CLASS_NAME, "nOdcT-MoOaXGePXLyPe0H").text
                                 toggled_members.append(member_name)
+
                         except Exception as e:
-                            logger(f"Error when clicking on the panel:{e}")
+                            logger(f"[{nickname}] Error when clicking on the panel: {e}")
 
                     if toggled_members:
                         for member in toggled_members:
