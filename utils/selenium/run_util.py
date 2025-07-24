@@ -1,3 +1,4 @@
+import asyncio
 import sqlite3
 import io
 from PIL import Image
@@ -15,13 +16,13 @@ async def run_selenium_check(session_id: str, steam_login_secure: str) -> tuple[
 
     try:
         driver.get("https://steampowered.com")
-        time.sleep(1)
+        await asyncio.sleep(1)
         driver.delete_all_cookies()
         driver.add_cookie({"name": "sessionid", "value": session_id, "domain": ".steampowered.com"})
         driver.add_cookie({"name": "steamLoginSecure", "value": steam_login_secure, "domain": ".steampowered.com"})
 
         driver.get("https://store.steampowered.com/account/familymanagement?tab=manage")
-        time.sleep(5)
+        await asyncio.sleep(5)
 
         elements = driver.find_elements(By.CLASS_NAME, "_3ayYOCw_ZCm0rF1vDVmwfO")
         nickname = extract_nickname(driver)
@@ -68,17 +69,17 @@ async def parse_family_members(session_id: str, steam_login_secure: str) -> tupl
     byte_io = None
     try:
         driver.get("https://steampowered.com")
-        time.sleep(1)
+        await asyncio.sleep(1)
         driver.delete_all_cookies()
         driver.add_cookie({"name": "sessionid", "value": session_id, "domain": ".steampowered.com"})
         driver.add_cookie({"name": "steamLoginSecure", "value": steam_login_secure, "domain": ".steampowered.com"})
 
         driver.get("https://store.steampowered.com/account/familymanagement?tab=manage")
-        time.sleep(5)
+        await asyncio.sleep(5)
         members = extract_family_members(driver)
 
         driver.get("https://store.steampowered.com/account/familymanagement?tab=history")
-        time.sleep(5)
+        await asyncio.sleep(5)
         screenshot = driver.get_screenshot_as_png()
         img = Image.open(io.BytesIO(screenshot))
         width, height = img.size
